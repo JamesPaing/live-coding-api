@@ -2,6 +2,8 @@ import { NextFunction, Response, Request } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { faker } from '@faker-js/faker';
 import Task from '../ models/task.model';
+import path from 'path';
+import fs from 'fs';
 
 const status = ['pending', 'onprogress', 'completed'];
 const priorities = ['low', 'medium', 'high'];
@@ -9,7 +11,7 @@ const priorities = ['low', 'medium', 'high'];
 export const migrateHandler = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const tasks = [];
-        const numDocs = 10;
+        const numDocs = 30;
 
         for (let i = 0; i < numDocs; i++) {
             tasks.push({
@@ -35,5 +37,35 @@ export const migrateHandler = catchAsync(
         await Task.insertMany(tasks);
 
         res.status(201).send('DB migration success!');
+    }
+);
+
+export const exportHandler = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const tasks = await Task.find();
+
+        res.setHeader('Content-Type', 'application/json');
+
+        // Send the documents as a JSON response
+        res.status(200).json(tasks);
+    }
+);
+
+export const exportDownloadHandler = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const tasks = await Task.find();
+
+        const filePath = path.join(__dirname, 'exported_data.json');
+
+        fs.writeFileSync(filePath, JSON.stringify(tasks));
+
+        res.download(filePath, 'exported_data.json', (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                res.status(500).send({ error: 'Failed to send the file.' });
+            } else {
+                fs.unlinkSync(filePath);
+            }
+        });
     }
 );

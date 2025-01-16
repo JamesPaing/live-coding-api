@@ -20,13 +20,9 @@ export const signJWTs = (payload: object) => {
 export const reIssueTokens = async (refreshToken: string) => {
     const { decoded } = jwtVerify(refreshToken);
 
-    console.log(decoded, 'decppded');
-
     if (!decoded) {
         return false;
     }
-
-    console.log('decoded passed');
 
     const userId = get(decoded, '_id');
 

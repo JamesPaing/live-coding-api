@@ -3,7 +3,11 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { loginHandler, registerHandler } from './controllers/auth.controller';
 import { getAllTasksHandler } from './controllers/task.controller';
-import { migrateHandler } from './controllers/migration.controller';
+import {
+    exportDownloadHandler,
+    exportHandler,
+    migrateHandler,
+} from './controllers/migration.controller';
 import { connect } from './utils/connect';
 import { errorHandler } from './helpers/error-handler';
 import { serializeUser } from './middlewares/serialize-user.middleware';
@@ -23,6 +27,8 @@ app.post('/auth/register', validate(registerSchema), registerHandler);
 app.post('/auth/login', validate(loginSchema), loginHandler);
 app.get('/api/tasks', requireUser, getAllTasksHandler);
 app.get('/migrate', migrateHandler);
+app.get('/exports', exportHandler);
+app.get('/exports/download', exportDownloadHandler);
 
 app.use(errorHandler);
 
